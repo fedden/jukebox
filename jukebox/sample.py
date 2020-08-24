@@ -117,6 +117,10 @@ def _sample(zs, labels_1, labels_2, sampling_kwargs, priors, sample_levels, hps)
         t.save(dict(zs=zs, labels=labels_1, sampling_kwargs=sampling_kwargs, x=x), f"{logdir}/data.pth.tar")
         save_wav(logdir, x, hps.sr)
         if alignments is None and priors[-1] is not None and priors[-1].n_tokens > 0 and not isinstance(priors[-1].labeller, EmptyLabeller):
+            try:
+                labels_1[-1], priors[-1], sampling_kwargs[-1]['fp16']
+            except:
+                import ipdb; ipdb.set_trace()
             alignments = get_alignment(x, zs, labels_1[-1], priors[-1], sampling_kwargs[-1]['fp16'], hps)
         # don't care
         # save_html(logdir, x, zs, labels_1[-1], alignments, hps)
