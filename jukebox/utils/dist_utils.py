@@ -43,7 +43,15 @@ def setup_dist_from_mpi(
     master_addr="127.0.0.1", backend="nccl", port=29500, n_attempts=5, verbose=False
 ):
     if dist.is_available():
-        return _setup_dist_from_mpi(master_addr, backend, port, n_attempts, verbose)
+        if not dist.is_initisialised():
+            return _setup_dist_from_mpi(master_addr, backend, port, n_attempts, verbose)
+        else:
+            from mpi4py import MPI
+            mpi_rank = MPI.COMM_WORLD.Get_rank()
+            use_cuda = torch.cuda.is_available()
+            local_rank = mpi_rank % 8
+            device = torch.device("cuda", local_rank) if use_cuda else torch.device("cpu")
+            return mpi_rank, local_rank, device
     else:
         use_cuda = torch.cuda.is_available()
         print(f'Using cuda {use_cuda}')
